@@ -3,166 +3,464 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MediBot - AI Medical Assistant</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+    <title>Medical Chatbot</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP for advanced animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.7.1/gsap.min.js"></script>
 </head>
+
 <body>
-    <div class="chatbot-container">
-        <div class="chatbot-card">
-            <!-- 3D Header with medical theme -->
-            <div class="chatbot-header">
-                <div class="header-content">
-                    <div class="bot-avatar">
-                        <div class="avatar-container">
-                            <img src="https://cdn-icons-png.flaticon.com/512/3305/3305803.png" alt="MediBot Avatar">
-                            <div class="pulse-ring"></div>
-                            <div class="status-indicator online"></div>
+    <!-- 3D Floating Medical Shapes Background -->
+    <div id="threejs-container"></div>
+    
+    <!-- Floating Medical Icons -->
+    <div class="medical-icon" style="top: 20%; left: 10%; font-size: 50px;">💊</div>
+    <div class="medical-icon" style="top: 30%; left: 80%; font-size: 60px;">🩺</div>
+    <div class="medical-icon" style="top: 70%; left: 15%; font-size: 70px;">🧬</div>
+    <div class="medical-icon" style="top: 60%; left: 75%; font-size: 45px;">🧪</div>
+    
+    <!-- Chat Interface -->
+    <div class="container-fluid h-100">
+        <div class="row justify-content-center h-100">
+            <div class="col-md-12 chat">
+                <div class="card">
+                    <!-- DNA Strand Decoration -->
+                    <svg class="dna-strand" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        <path d="M20,50 Q30,30 40,50 Q50,70 60,50 Q70,30 80,50" 
+                              stroke="rgba(0, 150, 136, 0.3)" 
+                              stroke-width="1" 
+                              fill="none" 
+                              stroke-dasharray="2,2"/>
+                    </svg>
+                    
+                    <!-- Header -->
+                    <div class="card-header msg_head">
+                        <div class="d-flex bd-highlight align-items-center">
+                            <div class="img_cont">
+                                <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img">
+                                <span class="online_icon"></span>
+                            </div>
+                            <div class="user_info ml-3">
+                                <span><strong>MEDICAL CHATBOT</strong></span>
+                                <p>ASK ME ANYTHING ABOUT HEALTH!</p>
+                            </div>
+                            <div class="ml-auto">
+                                <div class="floating-shape pill-shape"></div>
+                                <div class="floating-shape capsule-shape"></div>
+                                <div class="floating-shape heart-shape"></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="header-text">
-                        <h1>MediBot</h1>
-                        <p class="typing-animation">AI Medical Assistant is online</p>
-                    </div>
-                    <div class="header-icons">
-                        <button class="icon-btn"><i class="fas fa-ellipsis-v"></i></button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Chat messages container with 3D depth -->
-            <div class="chatbot-body" id="messageFormeight">
-                <!-- Welcome message -->
-                <div class="message bot-message welcome-message">
-                    <div class="message-content">
-                        <p>Hello! I'm MediBot, your AI medical assistant. How can I help you today?</p>
-                        <span class="message-time">Just now</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Input area with floating 3D effect -->
-            <div class="chatbot-footer">
-                <form id="messageArea" class="message-form">
-                    <div class="input-container">
-                        <input type="text" id="text" name="msg" placeholder="Ask about symptoms, medications, or health advice..." autocomplete="off" required>
-                        <button type="submit" id="send" class="send-btn">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                        <div class="quick-actions">
-                            <button type="button" class="quick-btn" data-query="Common cold symptoms">
-                                <i class="fas fa-head-side-cough"></i> Cold
-                            </button>
-                            <button type="button" class="quick-btn" data-query="Headache remedies">
-                                <i class="fas fa-head-side-virus"></i> Headache
-                            </button>
-                            <button type="button" class="quick-btn" data-query="First aid tips">
-                                <i class="fas fa-first-aid"></i> First Aid
-                            </button>
+                    
+                    <!-- Chat Body -->
+                    <div id="messageFormeight" class="card-body msg_card_body">
+                        <!-- Example Prompts -->
+                        <div id="examplePrompts" class="example-prompts">
+                            <div class="prompt-item floating-card" data-tilt data-tilt-glare data-tilt-max-glare="0.2" data-tilt-scale="1.1">
+                                <div class="prompt-icon">🔍</div>
+                                <div class="prompt-content">
+                                    <div class="prompt-title">SEARCH FOR MEDICINE</div>
+                                    <div class="prompt-desc">Find details about medicines like "Paracetamol" or "Ibuprofen" including dosage, side effects, and interactions</div>
+                                    <button class="search-now-btn">SEARCH NOW</button>
+                                </div>
+                                <div class="floating-pill"></div>
+                            </div>
+                            <div class="prompt-item floating-card" data-tilt data-tilt-glare data-tilt-max-glare="0.2" data-tilt-scale="1.1">
+                                <div class="prompt-icon">📖</div>
+                                <div class="prompt-content">
+                                    <div class="prompt-title">DEFINE MEDICAL TERM</div>
+                                    <div class="prompt-desc">Get definitions for terms like "Hypertension", "Diabetes Mellitus", or "Myocardial Infarction" in simple language</div>
+                                    <button class="search-now-btn">LEARN NOW</button>
+                                </div>
+                                <div class="floating-pill"></div>
+                            </div>
+                            <div class="prompt-item floating-card" data-tilt data-tilt-glare data-tilt-max-glare="0.2" data-tilt-scale="1.1">
+                                <div class="prompt-icon">🩺</div>
+                                <div class="prompt-content">
+                                    <div class="prompt-title">FIND MEDICINE FOR SYMPTOMS</div>
+                                    <div class="prompt-desc">Discover treatments for symptoms like "Headache and fever", "Cough and sore throat", or "Stomach pain"</div>
+                                    <button class="search-now-btn">FIND RELIEF</button>
+                                </div>
+                                <div class="floating-pill"></div>
+                            </div>
                         </div>
                     </div>
-                </form>
+                    
+                    <!-- Footer -->
+                    <div class="card-footer">
+                        <form id="messageArea" class="input-group">
+                            <input type="text" id="text" name="msg" placeholder="TYPE YOUR MESSAGE HERE..." autocomplete="off" class="form-control type_msg" required/>
+                            <div class="input-group-append">
+                                <button type="submit" id="send" class="input-group-text send_btn">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Floating medical icons decoration -->
-    <div class="floating-icons">
-        <i class="fas fa-heartbeat"></i>
-        <i class="fas fa-pills"></i>
-        <i class="fas fa-stethoscope"></i>
-        <i class="fas fa-syringe"></i>
-        <i class="fas fa-procedures"></i>
-    </div>
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery and AJAX Script -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <!-- Tilt.js for 3D effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tilt.js/1.2.1/tilt.jquery.min.js"></script>
+    <!-- Custom JS -->
     <script>
-        $(document).ready(function() {
-            // Auto-scroll to bottom of chat
-            function scrollToBottom() {
-                const chatBody = $(".chatbot-body");
-                chatBody.scrollTop(chatBody[0].scrollHeight);
-            }
-
-            // Quick action buttons
-            $(".quick-btn").click(function() {
-                const query = $(this).data("query");
-                $("#text").val(query);
-                $("#messageArea").submit();
+        $(document).ready(function () {
+            let firstMessageSent = false;
+            
+            // Initialize tilt.js with more parameters
+            $('.floating-card').tilt({
+                glare: true,
+                maxGlare: 0.3,
+                perspective: 1500,
+                scale: 1.05,
+                maxTilt: 15,
+                speed: 500
             });
-
-            // Message submission
-            $("#messageArea").on("submit", function(event) {
+            
+            // Add particles on click
+            $(document).on('click', function(e) {
+                createParticle(e.pageX, e.pageY);
+            });
+            
+            function createParticle(x, y) {
+                const particle = $('<div class="particle"></div>');
+                $('body').append(particle);
+                
+                const size = Math.random() * 15 + 5;
+                const color = `rgba(${Math.floor(Math.random() * 100 + 150)}, 
+                                  ${Math.floor(Math.random() * 200 + 50)}, 
+                                  ${Math.floor(Math.random() * 200 + 50)}, 
+                                  ${Math.random() * 0.5 + 0.3})`;
+                
+                gsap.set(particle, {
+                    x: x,
+                    y: y,
+                    width: size,
+                    height: size,
+                    background: color
+                });
+                
+                gsap.to(particle, {
+                    x: x + (Math.random() - 0.5) * 200,
+                    y: y + (Math.random() - 0.5) * 200,
+                    opacity: 0,
+                    duration: Math.random() * 2 + 1,
+                    onComplete: function() {
+                        particle.remove();
+                    }
+                });
+            }
+            
+            // 3D Medical Background Animation
+            const container = document.getElementById('threejs-container');
+            if (container) {
+                initThreeJS();
+            }
+            
+            // Example prompt click handlers
+            $('.prompt-item').on('click', function() {
+                const promptText = $(this).find('.prompt-title').text();
+                $('#text').val(promptText);
+                $('#messageArea').submit();
+            });
+            
+            $('.search-now-btn').on('click', function(e) {
+                e.stopPropagation();
+                const promptText = $(this).closest('.prompt-item').find('.prompt-title').text();
+                $('#text').val(promptText.replace('SEARCH NOW', '').replace('LEARN NOW', '').replace('FIND RELIEF', ''));
+                $('#messageArea').submit();
+            });
+            
+            $("#messageArea").on("submit", function (event) {
                 event.preventDefault();
                 const date = new Date();
                 const hour = date.getHours();
                 const minute = date.getMinutes().toString().padStart(2, '0');
-                const str_time = hour + ":" + minute;
-                var rawText = $("#text").val();
-
-                if (rawText.trim() === "") return;
-
-                // Add user message
-                var userHtml = `
-                    <div class="message user-message">
+                const str_time = `${hour}:${minute}`;
+                const rawText = $("#text").val();
+                
+                // Create typing indicator
+                const typingIndicator = `
+                    <div class="message-row bot-message">
+                        <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="message-avatar">
                         <div class="message-content">
-                            <p>${rawText}</p>
-                            <span class="message-time">${str_time}</span>
-                        </div>
-                        <div class="message-avatar">
-                            <img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" alt="User Avatar">
+                            <div class="message-text typing-indicator">
+                                <span></span>
+                                <span></span>
+                                <span></span>
+                            </div>
                         </div>
                     </div>
                 `;
                 
-                $("#text").val("");
-                $("#messageFormeight").append(userHtml);
-                scrollToBottom();
-
-                // Show typing indicator
-                var typingHtml = `
-                    <div class="message bot-message typing-indicator">
-                        <div class="message-avatar">
-                            <img src="https://cdn-icons-png.flaticon.com/512/3305/3305803.png" alt="MediBot Avatar">
-                        </div>
+                // Append User Message with animation
+                const userHtml = `
+                    <div class="message-row user-message animate__animated animate__fadeInRight">
                         <div class="message-content">
-                            <div class="typing-dots">
-                                <span></span>
-                                <span></span>
-                                <span></span>
-                            </div>
+                            <div class="message-text">${rawText}</div>
+                            <div class="message-time">${str_time}</div>
                         </div>
+                        <img src="https://i.ibb.co/d5b84Xw/Untitled-design.png" class="message-avatar">
                     </div>
                 `;
-                $("#messageFormeight").append(typingHtml);
+                
+                $("#text").val("");
+                
+                // Remove Example Prompts After First Message
+                if (!firstMessageSent) {
+                    $("#examplePrompts").addClass('animate__animated animate__fadeOut');
+                    setTimeout(() => {
+                        $("#examplePrompts").remove();
+                    }, 500);
+                    firstMessageSent = true;
+                }
+                
+                $("#messageFormeight").append(userHtml);
+                $("#messageFormeight").append(typingIndicator);
+                
+                // Scroll to Bottom
                 scrollToBottom();
-
-                // AJAX call to backend
+                
+                // Send AJAX Request
                 $.ajax({
                     data: { msg: rawText },
                     type: "POST",
                     url: "/get",
-                }).done(function(data) {
-                    // Remove typing indicator
-                    $(".typing-indicator").remove();
+                }).done(function (data) {
+                    $(".typing-indicator").parent().parent().remove();
                     
-                    // Add bot response
-                    var botHtml = `
-                        <div class="message bot-message">
-                            <div class="message-avatar">
-                                <img src=""https://cdn-icons-png.flaticon.com/512/387/387569.png" class="rounded-circle user_img" alt="MediBot Avatar">
-								</div>
+                    // Append Bot Message with animation
+                    const botHtml = `
+                        <div class="message-row bot-message animate__animated animate__fadeInLeft">
+                            <img src="https://cdn-icons-png.flaticon.com/512/387/387569.png" class="message-avatar">
                             <div class="message-content">
-                                <p>${data}</p>
-                                <span class="message-time">${str_time}</span>
+                                <div class="message-text">${data}</div>
+                                <div class="message-time">${str_time}</div>
                             </div>
                         </div>
                     `;
-                    $("#messageFormeight").append(botHtml);
+                    $("#messageFormeight").append($.parseHTML(botHtml));
                     scrollToBottom();
+                    
+                    // Add particles for bot response
+                    for (let i = 0; i < 10; i++) {
+                        setTimeout(() => {
+                            createParticle(
+                                Math.random() * window.innerWidth,
+                                Math.random() * window.innerHeight
+                            );
+                        }, i * 100);
+                    }
+                });
+            });
+            
+            // Auto Scroll Function
+            function scrollToBottom() {
+                const chatBody = document.querySelector(".msg_card_body");
+                chatBody.scrollTop = chatBody.scrollHeight;
+            }
+            
+            // 3D Medical Background Function
+            function initThreeJS() {
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ 
+                    alpha: true, 
+                    antialias: true,
+                    powerPreference: "high-performance"
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                container.appendChild(renderer.domElement);
+                
+                // Create floating medical shapes
+                const shapes = [];
+                const geometry = [
+                    new THREE.SphereGeometry(1, 32, 32), // Pills
+                    new THREE.CylinderGeometry(0.5, 0.5, 2, 32), // Capsules
+                    new THREE.TorusGeometry(1, 0.4, 16, 32), // DNA-like rings
+                    new THREE.DodecahedronGeometry(1, 0), // Complex molecules
+                    new THREE.ConeGeometry(1, 2, 32) // Medical cones
+                ];
+                
+                // Medical-themed colors
+                const colors = [
+                    0x00bcd4, // Teal
+                    0xff6f00, // Orange
+                    0x8bc34a, // Light Green
+                    0xffc107, // Amber
+                    0x9c27b0, // Purple
+                    0xf44336, // Red
+                    0x3f51b5, // Indigo
+                    0x009688  // Teal Green
+                ];
+                
+                // Create medical shapes
+                for (let i = 0; i < 25; i++) {
+                    const shapeType = Math.floor(Math.random() * geometry.length);
+                    const material = new THREE.MeshPhongMaterial({
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        transparent: true,
+                        opacity: 0.7,
+                        shininess: 100,
+                        specular: 0x111111,
+                        emissive: 0x000000,
+                        emissiveIntensity: 0.2
+                    });
+                    
+                    const shape = new THREE.Mesh(geometry[shapeType], material);
+                    
+                    // Position randomly in 3D space
+                    shape.position.x = Math.random() * 60 - 30;
+                    shape.position.y = Math.random() * 60 - 30;
+                    shape.position.z = Math.random() * 100 - 70;
+                    
+                    // Random rotation
+                    shape.rotation.set(
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI
+                    );
+                    
+                    // Random scale
+                    const scale = Math.random() * 2 + 0.5;
+                    shape.scale.set(scale, scale, scale);
+                    
+                    // Animation properties
+                    shape.userData = {
+                        speed: Math.random() * 0.02 + 0.01,
+                        rotationSpeed: {
+                            x: Math.random() * 0.02 - 0.01,
+                            y: Math.random() * 0.02 - 0.01,
+                            z: Math.random() * 0.02 - 0.01
+                        },
+                        direction: new THREE.Vector3(
+                            Math.random() * 0.02 - 0.01,
+                            Math.random() * 0.02 - 0.01,
+                            Math.random() * 0.02 - 0.01
+                        ).normalize()
+                    };
+                    
+                    shapes.push(shape);
+                    scene.add(shape);
+                }
+                
+                // Add DNA-like helix
+                const helixGeometry = new THREE.BufferGeometry();
+                const helixPoints = [];
+                const helixRadius = 5;
+                const helixHeight = 40;
+                const helixSegments = 100;
+                
+                for (let i = 0; i <= helixSegments; i++) {
+                    const angle = (i / helixSegments) * Math.PI * 10;
+                    const x = helixRadius * Math.cos(angle);
+                    const y = (i / helixSegments) * helixHeight - helixHeight / 2;
+                    const z = helixRadius * Math.sin(angle);
+                    helixPoints.push(new THREE.Vector3(x, y, z));
+                }
+                
+                helixGeometry.setFromPoints(helixPoints);
+                const helixMaterial = new THREE.LineBasicMaterial({ 
+                    color: 0x00bcd4,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const helix = new THREE.Line(helixGeometry, helixMaterial);
+                helix.position.z = -30;
+                scene.add(helix);
+                
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+                scene.add(ambientLight);
+                
+                const directionalLight1 = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight1.position.set(1, 1, 1);
+                scene.add(directionalLight1);
+                
+                const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+                directionalLight2.position.set(-1, -1, -1);
+                scene.add(directionalLight2);
+                
+                const pointLight = new THREE.PointLight(0x00bcd4, 1, 50);
+                pointLight.position.set(5, 5, 5);
+                scene.add(pointLight);
+                
+                camera.position.z = 40;
+                
+                // Animation loop
+                function animate() {
+                    requestAnimationFrame(animate);
+                    
+                    // Animate shapes
+                    shapes.forEach(shape => {
+                        // Move in direction
+                        shape.position.x += shape.userData.direction.x;
+                        shape.position.y += shape.userData.direction.y;
+                        shape.position.z += shape.userData.direction.z;
+                        
+                        // Rotate
+                        shape.rotation.x += shape.userData.rotationSpeed.x;
+                        shape.rotation.y += shape.userData.rotationSpeed.y;
+                        shape.rotation.z += shape.userData.rotationSpeed.z;
+                        
+                        // Bounce off boundaries
+                        if (Math.abs(shape.position.x) > 30) {
+                            shape.userData.direction.x *= -1;
+                        }
+                        if (Math.abs(shape.position.y) > 30) {
+                            shape.userData.direction.y *= -1;
+                        }
+                        if (Math.abs(shape.position.z) > 70 || shape.position.z < -70) {
+                            shape.userData.direction.z *= -1;
+                        }
+                    });
+                    
+                    // Rotate helix
+                    helix.rotation.y += 0.005;
+                    
+                    renderer.render(scene, camera);
+                }
+                
+                animate();
+                
+                // Handle window resize
+                window.addEventListener('resize', () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            // Parallax effect on mouse move
+            $(document).on('mousemove', function(e) {
+                const x = e.clientX / window.innerWidth;
+                const y = e.clientY / window.innerHeight;
+                
+                $('.card').css({
+                    'transform': `translateY(-10px) rotateX(${(y - 0.5) * 5}deg) rotateY(${(x - 0.5) * 5}deg)`
+                });
+                
+                $('.prompt-item').each(function(index) {
+                    const delay = index * 0.1;
+                    $(this).css({
+                        'transform': `translateY(-10px) translateZ(20px) rotateX(${(y - 0.5) * 2}deg) rotateY(${(x - 0.5) * 2}deg)`
+                    });
                 });
             });
         });
